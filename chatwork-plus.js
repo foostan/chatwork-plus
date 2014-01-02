@@ -6,7 +6,7 @@ RL.build = function() {
     var a = RL.getSortedRoomList();
     RL.filtered_room_list = [];
     RL.filtered_room_lists = {};
-    RL.category_dat["other"] = {};
+    RL.category_dat[RL.category_name_other] = {};
 
     var d = null, e = !1, k={};
 
@@ -146,7 +146,7 @@ RL.view.build = function(room_lists) {
       toggle = "on";
     }
 
-    if (room_id != "other") {
+    if (room_id != RL.category_name_other) {
       title = $C("#_chatCategoryList").find("[data-cat-id=" + room_id + "]").find("span._categoryName").text();
     } else {
       title = room_id
@@ -266,3 +266,64 @@ RL.updateCategoryToggle = function($chatCategoryTitle) {
   });
 }
 
+
+
+RL.category_name_other = "ohter";
+
+RL.getCategoryList = function() {
+  var category_list = {};
+  var default_category = {
+    name: "",
+    list: [],
+    order: null,
+    toggle: false,
+    notification: true
+  }
+
+  if (localStorage["category_list"]) {
+    category_list = JSON.parse(localStorage["category_list"]);
+  }
+
+  jQuery.each(RL.category_dat, function(id, category) {
+    if (!category_list[id]) {
+      category_list[id] = default_category;
+    }
+    category_list[id].name = category.name;
+    category_list[id].list = category.list;
+  });
+  if (!category_list[RL.category_name_other]) {
+    category_list[RL.category_name_other] = default_category;
+    category_list[RL.category_name_other].name = RL.category_name_other;
+  }
+
+  category_list['28283'].order = 1;
+  category_list['29963'].order = 2;
+  category_list[RL.category_name_other].order = 3;
+
+  RL.setCategoryList(category_list);
+  return category_list;
+}
+
+RL.setCategoryList = function(category_list) {
+  localStorage["category_list"] = JSON.stringify(category_list);
+}
+
+RL.getSortedCategoryList = function() {
+  var sortedCategoryList = [];
+
+  jQuery.each(RL.getCategoryList(), function(id, category) {
+    sortedCategoryList.push(category);
+  });
+  sortedCategoryList.sort(
+    function(a,b){
+      if(a.order === null && b.order === null) return 0;
+      if(a.order === null) return 1;
+      if(b.order === null) return -1;
+      if(a.order < b.order) return -1;
+      if(a.order > b.order) return 1;
+      return 0;
+    }
+  );
+
+  return sortedCategoryList;
+}

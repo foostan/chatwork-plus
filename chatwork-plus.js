@@ -275,6 +275,7 @@ RL.getCategories = function() {
   var default_category = {
     name: "",
     list: [],
+    category_id: null,
     order: null,
     toggle: false,
     notification: true
@@ -289,16 +290,14 @@ RL.getCategories = function() {
       categories[id] = $.extend({}, default_category);
     }
     categories[id].name = category.name;
+    categories[id].category_id = id;
     categories[id].list = category.list;
   });
   if (!categories[RL.category_name_other]) {
     categories[RL.category_name_other] = default_category;
     categories[RL.category_name_other].name = RL.category_name_other;
+    categories[RL.category_name_other].category_id = RL.category_name_other;
   }
-
-  categories['28283']["order"] = 1;
-  categories['29963']["order"] = 2;
-  categories[RL.category_name_other].order = 3;
 
   RL.setCategories(categories);
   return categories;
@@ -308,13 +307,29 @@ RL.setCategories = function(categories) {
   localStorage["categories"] = JSON.stringify(categories);
 }
 
+RL.setCategoryList = function(category_list) {
+  var categories = {};
+  category_list.forEach(function(category){
+    categories[category.category_id] = category;
+  });
+
+  console.log(categories);
+
+  RL.setCategories(categories);
+}
+
 RL.getSortedCategoryList = function() {
-  var sorted_category_list = [];
+  var category_list = [];
 
   jQuery.each(RL.getCategories(), function(id, category) {
-    sorted_category_list.push(category);
+    category_list.push(category);
   });
-  sorted_category_list.sort(
+
+  return RL.sortCategoryList(category_list);
+}
+
+RL.sortCategoryList = function(category_list) {
+  category_list.sort(
     function(a,b){
       if(a.order === null && b.order === null) return 0;
       if(a.order === null) return 1;
@@ -325,6 +340,6 @@ RL.getSortedCategoryList = function() {
     }
   );
 
-  return sorted_category_list;
+  return category_list;
 }
 

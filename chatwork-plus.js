@@ -270,8 +270,8 @@ RL.updateCategoryToggle = function($chatCategoryTitle) {
 
 RL.category_name_other = "ohter";
 
-RL.getCategoryList = function() {
-  var category_list = {};
+RL.getCategories = function() {
+  var categories = {};
   var default_category = {
     name: "",
     list: [],
@@ -280,41 +280,41 @@ RL.getCategoryList = function() {
     notification: true
   }
 
-  if (localStorage["category_list"]) {
-    category_list = JSON.parse(localStorage["category_list"]);
+  if (localStorage["categories"]) {
+    categories = JSON.parse(localStorage["categories"]);
   }
 
   jQuery.each(RL.category_dat, function(id, category) {
-    if (!category_list[id]) {
-      category_list[id] = default_category;
+    if (!categories[id]) {
+      categories[id] = $.extend({}, default_category);
     }
-    category_list[id].name = category.name;
-    category_list[id].list = category.list;
+    categories[id].name = category.name;
+    categories[id].list = category.list;
   });
-  if (!category_list[RL.category_name_other]) {
-    category_list[RL.category_name_other] = default_category;
-    category_list[RL.category_name_other].name = RL.category_name_other;
+  if (!categories[RL.category_name_other]) {
+    categories[RL.category_name_other] = default_category;
+    categories[RL.category_name_other].name = RL.category_name_other;
   }
 
-  category_list['28283'].order = 1;
-  category_list['29963'].order = 2;
-  category_list[RL.category_name_other].order = 3;
+  categories['28283']["order"] = 1;
+  categories['29963']["order"] = 2;
+  categories[RL.category_name_other].order = 3;
 
-  RL.setCategoryList(category_list);
-  return category_list;
+  RL.setCategories(categories);
+  return categories;
 }
 
-RL.setCategoryList = function(category_list) {
-  localStorage["category_list"] = JSON.stringify(category_list);
+RL.setCategories = function(categories) {
+  localStorage["categories"] = JSON.stringify(categories);
 }
 
 RL.getSortedCategoryList = function() {
-  var sortedCategoryList = [];
+  var sorted_category_list = [];
 
-  jQuery.each(RL.getCategoryList(), function(id, category) {
-    sortedCategoryList.push(category);
+  jQuery.each(RL.getCategories(), function(id, category) {
+    sorted_category_list.push(category);
   });
-  sortedCategoryList.sort(
+  sorted_category_list.sort(
     function(a,b){
       if(a.order === null && b.order === null) return 0;
       if(a.order === null) return 1;
@@ -325,5 +325,6 @@ RL.getSortedCategoryList = function() {
     }
   );
 
-  return sortedCategoryList;
+  return sorted_category_list;
 }
+

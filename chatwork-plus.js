@@ -40,10 +40,6 @@ RL.getCategories = function() {
   categories[RL.category_name_other].category_id = RL.category_name_other;
   categories[RL.category_name_other].list = [];
 
-  categories["29963"].order = 1;
-  categories["21639"].order = 3;
-  categories["other"].order = 2;
-
   RL.setCategories(categories);
   return categories;
 }

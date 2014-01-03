@@ -1,6 +1,12 @@
 // variables
 // ============
-RL.category_name_other = "ohter";
+RL.category_name_other = "other";
+
+// methods
+// ============
+// variables
+// ============
+RL.category_name_other = "other";
 
 // methods
 // ============
@@ -33,6 +39,10 @@ RL.getCategories = function() {
   categories[RL.category_name_other].name = RL.category_name_other;
   categories[RL.category_name_other].category_id = RL.category_name_other;
   categories[RL.category_name_other].list = [];
+
+  categories["29963"].order = 1;
+  categories["21639"].order = 3;
+  categories["other"].order = 2;
 
   RL.setCategories(categories);
   return categories;
@@ -212,8 +222,9 @@ RL.view.build = function(categorized_rooms) {
   $C("#_chatListEmptyArea").hide();
   $chatCategoryTitle = $("<li>").addClass("chatCategoryTitle");
 
-  jQuery.each(categorized_rooms, function(category_id, rooms) {
-
+  RL.getSortedCategoryList().forEach(function(category){
+    var category_id = category.category_id;
+    var rooms = categorized_rooms[category_id];
 
     if (category_id != RL.category_name_other) {
       title = $C("#_chatCategoryList").find("[data-cat-id=" + category_id + "]").find("span._categoryName").text();
@@ -275,6 +286,7 @@ RL.view.build = function(categorized_rooms) {
         d += $room[0].outerHTML;
       }
     }
+
   });
 
   $C("#_roomListItems").html(d);

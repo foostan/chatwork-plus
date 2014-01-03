@@ -22,19 +22,23 @@ RL.getCategories = function() {
   }
 
   if (localStorage["categories"]) {
-    categories = JSON.parse(localStorage["categories"]);
+    saved_categories = JSON.parse(localStorage["categories"]);
   }
 
   jQuery.each(RL.category_dat, function(id, category) {
-    if (!categories[id]) {
+    if (saved_categories[id]) {
+      categories[id] = saved_categories[id];
+    } else {
       categories[id] = $.extend({}, default_category);
     }
     categories[id].name = category.name;
     categories[id].category_id = id;
     categories[id].list = category.list;
   });
-  if (!categories[RL.category_name_other]) {
-    categories[RL.category_name_other] = default_category;
+  if (saved_categories[RL.category_name_other]) {
+    categories[RL.category_name_other] = saved_categories[RL.category_name_other];
+  } else {
+    categories[RL.category_name_other] = $.extend({}, default_category);
   }
   categories[RL.category_name_other].name = RL.category_name_other;
   categories[RL.category_name_other].category_id = RL.category_name_other;
@@ -50,14 +54,15 @@ RL.setCategories = function(categories) {
 
 RL.setCategoryList = function(category_list) {
   var categories = {};
-  category_list.forEach(function(category){
+  category_list.forEach(function(category, i){
+    category.order = i;
     categories[category.category_id] = category;
   });
 
   RL.setCategories(categories);
 }
 
-RL.getSortedCategoryList = function() {
+RL.getCategoryList = function() {
   var category_list = [];
 
   jQuery.each(RL.getCategories(), function(id, category) {
@@ -78,6 +83,30 @@ RL.sortCategoryList = function(category_list) {
       return 0;
     }
   );
+
+  return category_list;
+}
+
+RL.upCategoryOrder = function(category_id) {
+  order = RL.getCategories()[category_id].order;
+  category_list = RL.swapCategoryList(RL.getCategoryList(), order, order-1);
+  RL.setCategoryList(category_list);
+  RL.build();
+}
+
+RL.downCategoryOrder = function(category_id) {
+  order = RL.getCategories()[category_id].order;
+  category_list = RL.swapCategoryList(RL.getCategoryList(), order, order+1);
+  RL.setCategoryList(category_list);
+  RL.build();
+}
+
+RL.swapCategoryList = function(category_list, ia, ib) {
+  if (category_list[ia] && category_list[ib]) {
+    t = category_list[ia];
+    category_list[ia] = category_list[ib];
+    category_list[ib] = t;
+  }
 
   return category_list;
 }
@@ -218,7 +247,7 @@ RL.view.build = function(categorized_rooms) {
   $C("#_chatListEmptyArea").hide();
   $chatCategoryTitle = $("<li>").addClass("chatCategoryTitle");
 
-  RL.getSortedCategoryList().forEach(function(category){
+  RL.getCategoryList().forEach(function(category){
     var category_id = category.category_id;
     var rooms = categorized_rooms[category_id];
 
@@ -264,11 +293,16 @@ RL.view.build = function(categorized_rooms) {
       $mytask_badge = null;
     }
 
+    $order_botton = $("<li>").css("position", "absolute").css("top", "5px").css("right", "3px")
+      .append($("<span>").addClass("icoFontTriangleTop").addClass("_up_category_order"))
+      .append($("<span>").addClass("icoFontTriangleDown").addClass("_down_category_order"));
+
     $title_group = $("<ul>").addClass("incomplete")
       .append($title)
       .append($unread_badge)
       .append($mention_badge)
-      .append($mytask_badge);
+      .append($mytask_badge)
+      .append($order_botton);
 
     d += $chatCategoryTitle
       .attr("category_id", category_id)
@@ -282,7 +316,6 @@ RL.view.build = function(categorized_rooms) {
         d += $room[0].outerHTML;
       }
     }
-
   });
 
   $C("#_roomListItems").html(d);
@@ -302,6 +335,15 @@ $(document).on("click", ".chatCategoryTitle",function(){
   RL.toggleCategory(category_id)
 });
 
+$(document).on("click", "._up_category_order",function(e){
+  e.stopPropagation();
+  category_id = $(this).parent().parent().parent("li.chatCategoryTitle").attr("category_id");
+  RL.upCategoryOrder(category_id);
+});
 
-
+$(document).on("click", "._down_category_order",function(e){
+  e.stopPropagation();
+  category_id = $(this).parent().parent().parent("li.chatCategoryTitle").attr("category_id");
+  RL.downCategoryOrder(category_id);
+});
 

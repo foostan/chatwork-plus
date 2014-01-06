@@ -347,3 +347,6 @@ $(document).on("click", "._down_category_order",function(e){
   RL.downCategoryOrder(category_id);
 });
 
+// run
+// ============
+RL.build()
